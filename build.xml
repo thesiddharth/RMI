@@ -1,0 +1,207 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="lab2" default="all">
+  
+  
+  <property file="build.properties"/>
+  <!-- Uncomment the following property if no tests compilation is needed -->
+  <!-- 
+  <property name="skip.tests" value="true"/>
+   -->
+  
+  <!-- Compiler options -->
+  
+  <property name="compiler.debug" value="on"/>
+  <property name="compiler.generate.no.warnings" value="off"/>
+  <property name="compiler.args" value=""/>
+  <property name="compiler.max.memory" value="128m"/>
+  <patternset id="ignored.files">
+    <exclude name="**/CVS/**"/>
+    <exclude name="**/SCCS/**"/>
+    <exclude name="**/RCS/**"/>
+    <exclude name="**/rcs/**"/>
+    <exclude name="**/.DS_Store/**"/>
+    <exclude name="**/.svn/**"/>
+    <exclude name="**/.pyc/**"/>
+    <exclude name="**/.pyo/**"/>
+    <exclude name="**/*.pyc/**"/>
+    <exclude name="**/*.pyo/**"/>
+    <exclude name="**/.git/**"/>
+    <exclude name="**/*.hprof/**"/>
+    <exclude name="**/_svn/**"/>
+    <exclude name="**/.hg/**"/>
+    <exclude name="**/*.lib/**"/>
+    <exclude name="**/*~/**"/>
+    <exclude name="**/__pycache__/**"/>
+    <exclude name="**/.bundle/**"/>
+    <exclude name="**/*.rbc/**"/>
+    <exclude name="**/vssver.scc/**"/>
+    <exclude name="**/vssver2.scc/**"/>
+  </patternset>
+  <patternset id="library.patterns">
+    <include name="*.war"/>
+    <include name="*.ear"/>
+    <include name="*.apk"/>
+    <include name="*.zip"/>
+    <include name="*.swc"/>
+    <include name="*.ane"/>
+    <include name="*.egg"/>
+    <include name="*.jar"/>
+  </patternset>
+  <patternset id="compiler.resources">
+    <exclude name="**/?*.java"/>
+    <exclude name="**/?*.form"/>
+    <exclude name="**/?*.class"/>
+    <exclude name="**/?*.groovy"/>
+    <exclude name="**/?*.scala"/>
+    <exclude name="**/?*.flex"/>
+    <exclude name="**/?*.kt"/>
+    <exclude name="**/?*.clj"/>
+  </patternset>
+  
+  <!-- Modules -->
+  
+  
+  <!-- Module Project -->
+  
+  <dirname property="module.project.basedir" file="${ant.file}"/>
+  
+  
+  
+  <property name="compiler.args.project" value="${compiler.args}"/>
+
+  <property name="project.output.dir" value="${module.project.basedir}/out/production/Project"/>
+  <property name="project.artifacts.dir" value="${module.project.basedir}/out/artifacts"/>
+  <property name="project.testoutput.dir" value="${module.project.basedir}/out/test/Project"/>
+  
+  <path id="project.module.bootclasspath">
+    <!-- Paths to be included in compilation bootclasspath -->
+  </path>
+  
+  <path id="project.module.production.classpath"/>
+  
+  <path id="project.runtime.production.module.classpath">
+    <pathelement location="${project.output.dir}"/>
+  </path>
+  
+  <path id="project.module.classpath">
+    <pathelement location="${project.output.dir}"/>
+  </path>
+  
+  <path id="project.runtime.module.classpath">
+    <pathelement location="${project.testoutput.dir}"/>
+    <pathelement location="${project.output.dir}"/>
+  </path>
+  
+  
+  <patternset id="excluded.from.module.project">
+    <patternset refid="ignored.files"/>
+  </patternset>
+  
+  <patternset id="excluded.from.compilation.project">
+    <patternset refid="excluded.from.module.project"/>
+  </patternset>
+  
+  <path id="project.module.sourcepath">
+    <dirset dir="${module.project.basedir}">
+      <include name="src"/>
+    </dirset>
+  </path>
+  
+  
+  <target name="compile.module.project" depends="compile.module.project.production,compile.module.project.tests" description="Compile module Project"/>
+  
+  <target name="compile.module.project.production" description="Compile module Project; production classes">
+    <mkdir dir="${project.output.dir}"/>
+    <javac destdir="${project.output.dir}" debug="${compiler.debug}" nowarn="${compiler.generate.no.warnings}" memorymaximumsize="${compiler.max.memory}" fork="true">
+      <compilerarg line="${compiler.args.project}"/>
+      <bootclasspath refid="project.module.bootclasspath"/>
+      <classpath refid="project.module.production.classpath"/>
+      <src refid="project.module.sourcepath"/>
+      <patternset refid="excluded.from.compilation.project"/>
+    </javac>
+    
+    <copy todir="${project.output.dir}">
+      <fileset dir="${module.project.basedir}/src">
+        <patternset refid="compiler.resources"/>
+        <type type="file"/>
+      </fileset>
+    </copy>
+  </target>
+  
+  <target name="compile.module.project.tests" depends="compile.module.project.production" description="compile module Project; test classes" unless="skip.tests"/>
+  
+  <target name="clean.module.project" description="cleanup module">
+    <delete dir="${project.output.dir}"/>
+    <delete dir="${project.testoutput.dir}"/>
+    <delete dir="${project.artifacts.dir}"/>
+  </target>
+  
+  <target name="init" description="Build initialization">
+    <!-- Perform any build initialization in this target -->
+  </target>
+  
+  <target name="clean" depends="clean.module.project" description="cleanup all"/>
+  
+  <target name="build.modules" depends="init, clean, compile.module.project" description="build all modules"/>
+  
+  <target name="init.artifacts">
+    <property name="artifacts.temp.dir" value="${basedir}/__artifacts_temp"/>
+    <property name="artifact.output.rmiglobalregistry:jar" value="${basedir}/out/artifacts/RMIGlobalRegistry_jar"/>
+    <property name="artifact.output.rmiserver:jar" value="${basedir}/out/artifacts/RMIServer_jar"/>
+    <property name="artifact.output.testclient:jar" value="${basedir}/out/artifacts/TestClient_jar"/>
+    <mkdir dir="${artifacts.temp.dir}"/>
+    <property name="temp.jar.path.RMIGlobalRegistry.jar" value="${artifacts.temp.dir}/RMIGlobalRegistry.jar"/>
+    <property name="temp.jar.path.RMIServer.jar" value="${artifacts.temp.dir}/RMIServer.jar"/>
+    <property name="temp.jar.path.TestClient.jar" value="${artifacts.temp.dir}/TestClient.jar"/>
+  </target>
+  
+  <target name="artifact.rmiglobalregistry:jar" depends="init.artifacts, compile.module.project" description="Build &#39;RMIGlobalRegistry:jar&#39; artifact">
+    <property name="artifact.temp.output.rmiglobalregistry:jar" value="${artifacts.temp.dir}/RMIGlobalRegistry_jar"/>
+    <mkdir dir="${artifact.temp.output.rmiglobalregistry:jar}"/>
+    <jar destfile="${temp.jar.path.RMIGlobalRegistry.jar}" duplicate="preserve" filesetmanifest="mergewithoutmain">
+      <zipfileset file="${basedir}/src/manifests/RMIGlobalRegistry/META-INF/MANIFEST.MF" prefix="META-INF"/>
+      <zipfileset dir="${project.output.dir}"/>
+    </jar>
+    <copy file="${temp.jar.path.RMIGlobalRegistry.jar}" tofile="${artifact.temp.output.rmiglobalregistry:jar}/RMIGlobalRegistry.jar"/>
+  </target>
+  
+  <target name="artifact.rmiserver:jar" depends="init.artifacts, compile.module.project" description="Build &#39;RMIServer:jar&#39; artifact">
+    <property name="artifact.temp.output.rmiserver:jar" value="${artifacts.temp.dir}/RMIServer_jar"/>
+    <mkdir dir="${artifact.temp.output.rmiserver:jar}"/>
+    <jar destfile="${temp.jar.path.RMIServer.jar}" duplicate="preserve" filesetmanifest="mergewithoutmain">
+      <zipfileset file="${basedir}/src/manifests/RMIServer/META-INF/MANIFEST.MF" prefix="META-INF"/>
+      <zipfileset dir="${project.output.dir}"/>
+    </jar>
+    <copy file="${temp.jar.path.RMIServer.jar}" tofile="${artifact.temp.output.rmiserver:jar}/RMIServer.jar"/>
+  </target>
+  
+  <target name="artifact.testclient:jar" depends="init.artifacts, compile.module.project" description="Build &#39;TestClient:jar&#39; artifact">
+    <property name="artifact.temp.output.testclient:jar" value="${artifacts.temp.dir}/TestClient_jar"/>
+    <mkdir dir="${artifact.temp.output.testclient:jar}"/>
+    <jar destfile="${temp.jar.path.TestClient.jar}" duplicate="preserve" filesetmanifest="mergewithoutmain">
+      <zipfileset file="${basedir}/src/manifests/TestClient/META-INF/MANIFEST.MF" prefix="META-INF"/>
+      <zipfileset dir="${project.output.dir}"/>
+    </jar>
+    <copy file="${temp.jar.path.TestClient.jar}" tofile="${artifact.temp.output.testclient:jar}/TestClient.jar"/>
+  </target>
+  
+  <target name="build.all.artifacts" depends="artifact.rmiglobalregistry:jar, artifact.rmiserver:jar, artifact.testclient:jar" description="Build all artifacts">
+    <mkdir dir="${artifact.output.rmiglobalregistry:jar}"/>
+    <copy todir="${artifact.output.rmiglobalregistry:jar}">
+      <fileset dir="${artifact.temp.output.rmiglobalregistry:jar}"/>
+    </copy>
+    <mkdir dir="${artifact.output.rmiserver:jar}"/>
+    <copy todir="${artifact.output.rmiserver:jar}">
+      <fileset dir="${artifact.temp.output.rmiserver:jar}"/>
+    </copy>
+    <mkdir dir="${artifact.output.testclient:jar}"/>
+    <copy todir="${artifact.output.testclient:jar}">
+      <fileset dir="${artifact.temp.output.testclient:jar}"/>
+    </copy>
+    
+    <!-- Delete temporary files -->
+    <delete dir="${artifacts.temp.dir}"/>
+  </target>
+  
+  <target name="all" depends="build.modules, build.all.artifacts" description="build all"/>
+</project>
